@@ -13,7 +13,7 @@ interface TodoItemProps {
 
 export function TodoItem({ text, done, selected }: TodoItemProps): React.ReactElement {
   const checkbox = done ? '[✓]' : '[ ]';
-  const textColor = done ? 'green' : selected ? 'white' : 'white';
+  const textColor = done ? 'green' : selected ? 'cyan' : 'white';
 
   return (
     <Row height={1} paddingLeft={2}>

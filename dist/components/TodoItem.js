@@ -11,7 +11,7 @@ const react_1 = __importDefault(require("react"));
 const ui_1 = require("../ui");
 function TodoItem({ text, done, selected }) {
     const checkbox = done ? '[✓]' : '[ ]';
-    const textColor = done ? 'green' : selected ? 'white' : 'white';
+    const textColor = done ? 'green' : selected ? 'cyan' : 'white';
     return (react_1.default.createElement(ui_1.Row, { height: 1, paddingLeft: 2 },
         react_1.default.createElement(ui_1.Badge, { label: selected ? '▶ ' : '  ', color: selected ? 'cyan' : 'white', width: 2 }),
         react_1.default.createElement(ui_1.Badge, { label: checkbox + ' ', color: done ? 'green' : selected ? 'cyan' : 'grey', width: 5 }),

@@ -11,6 +11,7 @@ interface TextLineProps {
   dim?: boolean;
   /** Fixed column width — content is NOT automatically truncated by Yoga */
   width?: number;
+  flexGrow?: number;
 }
 
 export function TextLine({
@@ -19,6 +20,7 @@ export function TextLine({
   bold = false,
   dim = false,
   width,
+  flexGrow = width == null ? 1 : undefined,
 }: TextLineProps): React.ReactElement {
   const fg = dim ? 'grey' : color;
   return (
@@ -28,6 +30,7 @@ export function TextLine({
       style={{ fg, bold } as any}
       height={1}
       width={width}
+      flexGrow={flexGrow}
     />
   );
 }
