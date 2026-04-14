@@ -17,6 +17,7 @@ const screen = blessed.screen({
   title: 'TerminalReact',
   input:  ttyInput,
   output: ttyOutput,
+  mouse:  true,   // enable mouse so clickable widgets work
 });
 const registry = new Map();
 registry.set('root', screen);
@@ -39,16 +40,28 @@ function handleMessage(msg) {
       const widget = blessed[widgetType]({
         ...msg.props,
       });
-      // Forward events back to Node.js via stdout
+      // Forward click events back to Node.js via stdout
       widget.on('click', () => {
         process.stdout.write(JSON.stringify({
           event: 'click', targetId: msg.id
         }) + '\n');
       });
+      // Forward keypress events — guard against null key to avoid crashes
       widget.on('keypress', (ch, key) => {
+        if (!key) return;
         process.stdout.write(JSON.stringify({
           event: 'keypress', targetId: msg.id,
           key: key.name, ch
+        }) + '\n');
+      });
+      widget.on('submit', (value) => {
+        process.stdout.write(JSON.stringify({
+          event: 'submit', targetId: msg.id, value
+        }) + '\n');
+      });
+      widget.on('cancel', () => {
+        process.stdout.write(JSON.stringify({
+          event: 'cancel', targetId: msg.id
         }) + '\n');
       });
       registry.set(msg.id, widget);
@@ -71,21 +84,54 @@ function handleMessage(msg) {
       if (widget && msg.props) {
         Object.assign(widget.options, msg.props);
         if (msg.props.content != null) widget.setContent(msg.props.content);
-        if (msg.props.label != null) widget.setLabel(msg.props.label);
+        if (msg.props.label  != null) widget.setLabel(msg.props.label);
+        if (msg.props.style  != null) {
+          Object.assign(widget.style, msg.props.style);
+        }
       }
       break;
     }
     case 'setText': {
       const widget = registry.get(msg.id);
-      if (widget) widget.setContent(msg.text);
+      if (widget) {
+        if (typeof widget.setValue === 'function') {
+          widget.setValue(msg.text);
+        } else {
+          widget.setContent(msg.text);
+        }
+      }
+      break;
+    }
+    case 'focus': {
+      const widget = registry.get(msg.id);
+      if (widget) widget.focus();
+      break;
+    }
+    // Explicitly start readInput on a textbox — used after clearing and re-focusing
+    // so inputOnFocus fires even when the widget is already focused
+    case 'readInput': {
+      const widget = registry.get(msg.id);
+      if (widget && typeof widget.readInput === 'function') {
+        widget.readInput(() => {});
+      }
+      break;
+    }
+    case 'show': {
+      const widget = registry.get(msg.id);
+      if (widget) widget.show();
+      break;
+    }
+    case 'hide': {
+      const widget = registry.get(msg.id);
+      if (widget) widget.hide();
       break;
     }
     case 'layout': {
       const widget = registry.get(msg.id);
       if (widget) {
-        widget.left = msg.x;
-        widget.top = msg.y;
-        widget.width = msg.w;
+        widget.left   = msg.x;
+        widget.top    = msg.y;
+        widget.width  = msg.w;
         widget.height = msg.h;
       }
       break;
@@ -97,5 +143,5 @@ function handleMessage(msg) {
   }
 }
 
-// Exit on q/Escape/Ctrl-C
-screen.key(['q', 'escape', 'C-c'], () => process.exit(0));
+// Exit on q/Ctrl-C (not escape — the textbox uses escape to cancel)
+screen.key(['q', 'C-c'], () => process.exit(0));

@@ -1,16 +1,28 @@
 {
   "dependencies": {
-    "blessed": "^0.1.81"
+    "blessed": "^0.1.81",
+    "react": "^18.3.1",
+    "react-reconciler": "^0.29.2",
+    "yoga-layout-prebuilt": "^1.10.0"
   },
   "name": "assignment10_sdt210",
   "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
+  "description": "Custom React renderer targeting the terminal via blessed + IPC",
+  "main": "dist/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "npm run build && node dist/main.js",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/blessed": "^0.1.25",
+    "@types/node": "^20.19.39",
+    "@types/react": "^18.3.28",
+    "@types/react-reconciler": "^0.26.7",
+    "typescript": "^5.9.3"
+  }
 }
